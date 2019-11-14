@@ -8,6 +8,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\User;
+use Exception;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
@@ -121,17 +122,26 @@ class AuthController extends Controller
 
         $new = $request->old_password;
         $usr = $user->password;
+        
+        try {
+            if (!Hash::check($new, $usr)) {
+                $code = 404;
+                $response = ['code' => $code, 'message' => 'Password no Match'];
+                return response()->json($response, $code);
+            }    
+        } catch (Exception $e) {
+            $response = ['status' => $e];
+            return response()->json($response, 404);
+        }
+        
+        $user_id = $user->id;
+        $password = $request->password;
 
-        if (Hash::check($new, $usr)) {
-            $user_id = $user->id;
-            $password = $request->password;
-
-            $user = User::find($user_id);
-            $user->password = $password;
-            $user->save();
-            $code = 200;
-            $response = ['code' => $code, 'message' => 'berhasil ubah Password'];
-            return response()->json($response, $code);
-        }     
-    }
+        $user = User::find($user_id);
+        $user->password = $password;
+        $user->save();
+        $code = 200;
+        $response = ['code' => $code, 'message' => 'berhasil ubah Password'];
+        return response()->json($response, $code);
+}
 }
