@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\GetUserFromToken;
+use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateProfileRequest;
@@ -10,6 +11,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
+use Hash;
 
 class AuthController extends Controller
 {
@@ -34,7 +36,6 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $credentials = request(['email', 'password']);
-
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 $code = 404;
@@ -97,7 +98,7 @@ class AuthController extends Controller
     }
 
     public function updateName(UpdateProfileRequest $request)
-    { 
+    {
         $user = JWTAuth::parseToken()->authenticate();
         $user_id = $user->id;
         $name = $request->name;
@@ -111,5 +112,26 @@ class AuthController extends Controller
         $code = 200;
         $response = ['code' => $code, 'meesage' => 'berhasil ubah profile'];
         return response()->json($response, $code);
+    }
+
+
+    public function changepassword(ChangePasswordRequest $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $new = $request->old_password;
+        $usr = $user->password;
+
+        if (Hash::check($new, $usr)) {
+            $user_id = $user->id;
+            $password = $request->password;
+
+            $user = User::find($user_id);
+            $user->password = $password;
+            $user->save();
+            $code = 200;
+            $response = ['code' => $code, 'message' => 'berhasil ubah Password'];
+            return response()->json($response, $code);
+        }     
     }
 }

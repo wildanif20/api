@@ -30,7 +30,8 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::group(['middleware' => 'api.auth'], function () {
         Route::post('logout', 'AuthController@logout');
         Route::put('update_name', 'AuthController@updatename');
-        Route::post('refresh', 'AuthController@refresh');        
+        Route::post('refresh', 'AuthController@refresh');     
+        Route::post('change_password', 'AuthController@changepassword');
     });
 
 });
