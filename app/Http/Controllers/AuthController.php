@@ -120,11 +120,11 @@ class AuthController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-        $new = $request->old_password;
+        $old = $request->old_password;
         $usr = $user->password;
         
         try {
-            if (!Hash::check($new, $usr)) {
+            if (!Hash::check($old, $usr)) {
                 $code = 404;
                 $response = ['code' => $code, 'message' => 'Password no Match'];
                 return response()->json($response, $code);
